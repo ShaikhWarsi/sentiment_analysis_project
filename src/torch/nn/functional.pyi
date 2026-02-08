@@ -1,0 +1,3 @@
+from torch import Tensor
+
+def softmax(input: Tensor, dim: int) -> Tensor: ...

@@ -1,12 +1,13 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
 import torch
 import torch.nn.functional as F
-from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
 
 class SentimentTransformer:
-    def __init__(self, model_name: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment", cache_dir: str = None):
+    def __init__(self, model_name: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment", cache_dir: Optional[str] = None):
         """
         Initialize the transformer model for sentiment analysis.
         Args:

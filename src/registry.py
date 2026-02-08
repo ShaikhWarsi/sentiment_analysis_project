@@ -2,10 +2,9 @@ import json
 import os
 import shutil
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from sqlalchemy.orm import Session
-
 from src.database import ModelVersion, get_db_session
 
 
@@ -55,10 +54,10 @@ class ModelRegistry:
         return model_version
 
     def get_model(self, version: str) -> Optional[ModelVersion]:
-        return self.session.query(ModelVersion).filter_by(version=version).first()
+        return cast(Optional[ModelVersion], self.session.query(ModelVersion).filter_by(version=version).first())
 
     def list_models(self) -> List[ModelVersion]:
-        return self.session.query(ModelVersion).order_by(ModelVersion.created_at.desc()).all()
+        return cast(List[ModelVersion], self.session.query(ModelVersion).order_by(ModelVersion.created_at.desc()).all())
 
     def set_status(self, version: str, status: str) -> bool:
         model = self.get_model(version)
@@ -70,10 +69,10 @@ class ModelRegistry:
 
     def get_latest_active_model(self) -> Optional[ModelVersion]:
         """Get the most recently created model with status 'active'"""
-        return self.session.query(ModelVersion)\
+        return cast(Optional[ModelVersion], self.session.query(ModelVersion)\
             .filter_by(status='active')\
             .order_by(ModelVersion.created_at.desc())\
-            .first()
+            .first())
 
     def rollback(self) -> Optional[ModelVersion]:
         """

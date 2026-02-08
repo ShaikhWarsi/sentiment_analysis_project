@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-from typing import Optional
+from typing import Optional, cast
 
 from src.database import ModelVersion, get_db_session
 
@@ -76,7 +76,7 @@ def rollback_to_previous() -> bool:
 
 def get_active_version() -> Optional[ModelVersion]:
     db_session = get_db_session()
-    version = db_session.query(ModelVersion).filter(ModelVersion.status == 'active').first()
+    version = cast(Optional[ModelVersion], db_session.query(ModelVersion).filter(ModelVersion.status == 'active').first())
     db_session.close()
     return version
 

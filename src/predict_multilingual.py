@@ -5,10 +5,10 @@ Uses XLM-RoBERTa for multilingual sentiment analysis
 import time
 from typing import Any, Dict, List, Optional
 
-import torch
-import torch.nn.functional as F
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
+import torch
+import torch.nn.functional as F
 from src.language_detection import AdvancedLanguageDetector
 
 
@@ -22,7 +22,7 @@ class MultilingualSentimentPredictor:
         model_name: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment",
         auto_detect: bool = True,
         quantize: bool = False,
-        cache_dir: str = None
+        cache_dir: Optional[str] = None
     ):
         """
         Initialize multilingual predictor with XLM-RoBERTa
