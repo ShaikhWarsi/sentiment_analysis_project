@@ -6,7 +6,6 @@ import time
 from typing import Any, Dict, List, Optional
 
 import torch
-
 import torch.nn.functional as F
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 from src.language_detection import AdvancedLanguageDetector
