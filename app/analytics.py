@@ -1,4 +1,5 @@
 import pandas as pd
+
 from src.database import get_db_session, Prediction
 
 def get_dashboard_stats(start_date=None, end_date=None, variant_id=None, language=None):

@@ -2,8 +2,8 @@
 Extended Flask API with Multilingual Sentiment Analysis Support
 Add these routes to your existing app/api.py or use as separate blueprint
 """
-from flask import Blueprint, jsonify, render_template, request
 from dotenv import load_dotenv
+from flask import Blueprint, jsonify, render_template, request
 
 # Import multilingual predictor
 from src.predict_multilingual import (
@@ -316,4 +316,3 @@ def detect_language():
     except Exception as e:
         print(f"Error in language detection: {e}")
         return jsonify({"error": "Internal server error"}), 500
-

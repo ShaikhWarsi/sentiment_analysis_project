@@ -2,8 +2,6 @@
 Multilingual Sentiment Predictor
 Uses XLM-RoBERTa for multilingual sentiment analysis
 """
-import json
-import os
 import time
 from typing import Any, Dict, List, Optional
 
