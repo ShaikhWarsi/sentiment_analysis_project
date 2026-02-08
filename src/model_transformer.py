@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
+
 class SentimentTransformer:
     def __init__(self, model_name: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment", cache_dir: str = None):
         """
