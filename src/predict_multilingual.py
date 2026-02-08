@@ -2,8 +2,8 @@
 Multilingual Sentiment Predictor
 Uses XLM-RoBERTa for multilingual sentiment analysis
 """
-from typing import Any, Dict, List, Optional
 import time
+from typing import Any, Dict, List, Optional
 
 import torch
 import torch.nn.functional as F
