@@ -1,9 +1,5 @@
-from src.database import get_db_session, Prediction, Feedback, ModelVersion
-from sqlalchemy import func, desc, and_
-from collections import defaultdict
-from datetime import datetime, timedelta
 import pandas as pd
-import json
+from src.database import get_db_session, Prediction
 
 def get_dashboard_stats(start_date=None, end_date=None, variant_id=None, language=None):
     """
@@ -107,8 +103,10 @@ def export_predictions_csv(start_date=None, end_date=None):
     """
     session = get_db_session()
     query = session.query(Prediction)
-    if start_date: query = query.filter(Prediction.timestamp >= start_date)
-    if end_date: query = query.filter(Prediction.timestamp <= end_date)
+    if start_date:
+        query = query.filter(Prediction.timestamp >= start_date)
+    if end_date:
+        query = query.filter(Prediction.timestamp <= end_date)
     
     predictions = query.all()
     session.close()

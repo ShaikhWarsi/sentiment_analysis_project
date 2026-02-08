@@ -1,8 +1,6 @@
 import pytest
-import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 from app.api import app
-from app.api_multilingual import multilingual_bp
 
 @pytest.fixture
 def client():
@@ -65,12 +63,7 @@ def mock_predictor():
         }
 
 
-@pytest.fixture
-def client():
-    """Sets up a fake client to test the app without running the server"""
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
+
 
 @pytest.fixture
 def mock_predict_multilingual():
@@ -231,7 +224,7 @@ class TestLanguageDetection:
         
         # We need to ensure _multilingual_predictor is set in the app module scope
         with patch('app.api_multilingual._multilingual_predictor', mock_predictor['obj']):
-            response = client.post('/detect-language', 
+            response = client.post('/detect-language',
                                  json={'text': 'Hello, how are you doing today?'})
         
             assert response.status_code == 200
@@ -245,7 +238,7 @@ class TestLanguageDetection:
         mock_predictor['obj'].language_detector.get_confidence.return_value = {'fr': 0.95}
 
         with patch('app.api_multilingual._multilingual_predictor', mock_predictor['obj']):
-            response = client.post('/detect-language', 
+            response = client.post('/detect-language',
                                  json={'text': 'Bonjour le monde'})
             
             assert response.status_code == 200
@@ -254,10 +247,10 @@ class TestLanguageDetection:
     
     def test_detect_spanish(self, client, mock_predictor):
         """Test language detection - mocked"""
-        mock_predictor['obj'].language_detector.detect.return_value = 'es' 
+        mock_predictor['obj'].language_detector.detect.return_value = 'es'
         
         with patch('app.api_multilingual._multilingual_predictor', mock_predictor['obj']):
-            response = client.post('/detect-language', 
+            response = client.post('/detect-language',
                                  json={'text': 'Hola mundo'})
             
             assert response.status_code == 200

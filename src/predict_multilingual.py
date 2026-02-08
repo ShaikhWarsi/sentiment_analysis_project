@@ -9,12 +9,8 @@ from typing import Any, Dict, List, Optional
 
 import torch
 
-from src.language_detection import AdvancedLanguageDetector
-from src.model import SentimentLSTM
-from src.preprocessing_multilingual import MultilingualTextPreprocessor
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, AutoConfig
 import torch.nn.functional as F
-
+from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 from src.language_detection import AdvancedLanguageDetector
 
 
@@ -39,22 +35,12 @@ class MultilingualSentimentPredictor:
             quantize: Whether to apply dynamic quantization
             cache_dir: Directory to cache model files
         """
-        if models_dir is None:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(script_dir)
-            models_dir = os.path.join(project_root, 'models', 'multilingual')
-
-        self.models_dir = models_dir
         self.auto_detect = auto_detect
         self.quantize = quantize
+        self.model_name = model_name
 
         # Language detector
         self.language_detector = AdvancedLanguageDetector()
-
-        # Storage for models and preprocessors
-        self.models: Dict[str, SentimentLSTM] = {}
-        self.preprocessors: Dict[str, MultilingualTextPreprocessor] = {}
-        self.metadata: Dict[str, Dict[str, Any]] = {}
 
         # Supported languages
         self.supported_languages = {'en', 'es', 'fr', 'de', 'hi'}
@@ -62,81 +48,18 @@ class MultilingualSentimentPredictor:
         # Device
         self.device = torch.device('cpu')
 
-        # Load available models
-        self._load_available_models()
+        # Initialize transformer tokenizer and model
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name, cache_dir=cache_dir)
+        self.config = AutoConfig.from_pretrained(model_name, cache_dir=cache_dir)
+        self.model.to(self.device)
+        self.model.eval()
 
-    def _load_available_models(self) -> None:
-        """Load all available language models"""
-        if not os.path.exists(self.models_dir):
-            print(f"Warning: Models directory not found: {self.models_dir}")
-            print("Creating directory structure...")
-            os.makedirs(self.models_dir, exist_ok=True)
-            return
+    # Removed legacy LSTM-based model loading methods
 
-        for lang in self.supported_languages:
-            model_path = os.path.join(self.models_dir, f'{lang}_model.pth')
-            preprocessor_path = os.path.join(self.models_dir, f'{lang}_preprocessor.pkl')
-            metadata_path = os.path.join(self.models_dir, f'{lang}_metadata.json')
+    # Removed legacy LSTM-based model loading methods
 
-            if os.path.exists(model_path) and os.path.exists(preprocessor_path):
-                try:
-                    self._load_language_model(lang, model_path, preprocessor_path, metadata_path)
-                except Exception as e:
-                    print(f"Error loading {lang} model: {e}")
-
-    def _load_language_model(
-        self,
-        language: str,
-        model_path: str,
-        preprocessor_path: str,
-        metadata_path: Optional[str] = None
-    ) -> None:
-        """Load model for specific language"""
-        # Load preprocessor
-        preprocessor = MultilingualTextPreprocessor.load(preprocessor_path)
-        self.preprocessors[language] = preprocessor
-
-        # Load model
-        model = SentimentLSTM.load(model_path)
-        model.eval()
-        model = model.to(self.device)
-
-        # Apply quantization if requested
-        if self.quantize:
-            try:
-                model = torch.quantization.quantize_dynamic(
-                    model, {torch.nn.Linear, torch.nn.LSTM}, dtype=torch.qint8
-                )
-            except Exception as e:
-                print(f"Quantization failed for {language}: {e}")
-
-        self.models[language] = model
-
-        # Load metadata
-        metadata = {"version": "1.0", "language": language}
-        if metadata_path and os.path.exists(metadata_path):
-            try:
-                with open(metadata_path, 'r') as f:
-                    metadata = json.load(f)
-            except Exception as e:
-                print(f"Could not load metadata for {language}: {e}")
-
-        self.metadata[language] = metadata
-
-        print(f"Loaded {language.upper()} model successfully")
-
-    def add_language_model(
-        self,
-        language: str,
-        model_path: str,
-        preprocessor_path: str,
-        metadata_path: Optional[str] = None
-    ) -> None:
-        """Add a new language model at runtime"""
-        if language not in self.supported_languages:
-            print(f"Warning: {language} is not in supported languages list")
-
-        self._load_language_model(language, model_path, preprocessor_path, metadata_path)
+    # Removed legacy add_language_model method
 
     def predict(
         self,
@@ -166,26 +89,14 @@ class MultilingualSentimentPredictor:
         elif language is None:
             language = 'en'  # Default to English
 
-        # Check if model is available
-        if language not in self.models:
-            # Fallback to English if available
-            if 'en' in self.models:
-                print(f"Warning: No model for {language}, using English")
-                language = 'en'
-            else:
-                raise ValueError(f"No model available for language: {language}")
-
-        # Get model and preprocessor
-        model = self.models[language]
-        preprocessor = self.preprocessors[language]
-
-        # Preprocess text
-        text_tensor = preprocessor.transform(text, language)
-        text_tensor = text_tensor.unsqueeze(0).to(self.device)
+        # Ensure language is one of supported (for metadata purposes only)
+        if language and language not in self.supported_languages:
+            detected_language = language  # keep user-provided code even if unsupported
 
         # Make prediction
         with torch.no_grad():
             start_time = time.time()
+            inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(self.device)
             outputs = self.model(**inputs)
             scores = outputs.logits[0].detach().cpu()
             probs = F.softmax(scores, dim=0).numpy()

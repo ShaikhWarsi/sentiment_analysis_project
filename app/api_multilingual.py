@@ -2,10 +2,8 @@
 Extended Flask API with Multilingual Sentiment Analysis Support
 Add these routes to your existing app/api.py or use as separate blueprint
 """
-from flask import Blueprint, request, jsonify, render_template
-from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask import Blueprint, jsonify, render_template, request
+from dotenv import load_dotenv
 
 # Import multilingual predictor
 from src.predict_multilingual import (
@@ -32,7 +30,7 @@ def ensure_predictor_initialized():
             # Initialize with XLM-RoBERTa
             initialize_multilingual_predictor(
                 model_name="cardiffnlp/twitter-xlm-roberta-base-sentiment",
-                auto_detect=True, 
+                auto_detect=True,
                 quantize=True
             )
             print("Multilingual predictor initialized successfully")
@@ -319,28 +317,3 @@ def detect_language():
         print(f"Error in language detection: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
-
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    """Handle rate limit exceeded"""
-    return jsonify({
-        "error": "Rate limit exceeded",
-        "message": str(e.description)
-    }), 429
-
-
-@app.errorhandler(404)
-def not_found(e):
-    """Handle 404 errors"""
-    return jsonify({"error": "Endpoint not found"}), 404
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    """Handle 500 errors"""
-    return jsonify({"error": "Internal server error"}), 500
-
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)

@@ -2,11 +2,6 @@
 Database module for sentiment analysis application.
 Provides SQLAlchemy models and database initialization.
 """
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from datetime import datetime
-import os
 import json
 import os
 from datetime import datetime

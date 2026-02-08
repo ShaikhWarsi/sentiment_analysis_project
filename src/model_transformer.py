@@ -1,8 +1,8 @@
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, AutoConfig
+from typing import Any, Dict, List
+
 import torch
 import torch.nn.functional as F
-from typing import Dict, List, Any
-import os
+from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
 class SentimentTransformer:
     def __init__(self, model_name: str = "cardiffnlp/twitter-xlm-roberta-base-sentiment", cache_dir: str = None):

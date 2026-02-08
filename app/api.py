@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 from app.admin_routes import admin_bp
+from app.api_multilingual import multilingual_bp
 from src.ab_testing.framework import ABTestingFramework, TrafficSplitStrategy
 
 # Initialize Flask
@@ -56,7 +57,6 @@ app = Flask(__name__,
 app.register_blueprint(admin_bp)
 
 # Register Multilingual Blueprint
-from app.api_multilingual import multilingual_bp
 app.register_blueprint(multilingual_bp)
 
 def get_client_identifier():
@@ -741,5 +741,4 @@ def detect_language_endpoint() -> tuple[Dict[str, Any], int]:
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
